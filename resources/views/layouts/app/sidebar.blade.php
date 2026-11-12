@@ -18,6 +18,9 @@
                     <flux:sidebar.item icon="layout-grid" :href="route('spaces.index')" :current="request()->routeIs('spaces.*')" wire:navigate>
                         {{ __('Spaces') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="code-bracket" :href="route('embed.generator')" :current="request()->routeIs('embed.*')" wire:navigate>
+                        {{ __('Embed Widget') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
