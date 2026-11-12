@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Enums\SubscriptionStatus;
+use App\Enums\UserPlan;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +33,12 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'plan' => UserPlan::Free,
+            'stripe_customer_id' => null,
+            'stripe_subscription_id' => null,
+            'subscription_status' => SubscriptionStatus::Inactive,
+            'trial_ends_at' => null,
+            'subscription_ends_at' => null,
             'remember_token' => Str::random(10),
             /* @chisel-2fa */
             'two_factor_secret' => null,
@@ -36,6 +46,32 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => null,
             /* @end-chisel-2fa */
         ];
+    }
+
+    /**
+     * Indicate that the user is on the Pro plan.
+     */
+    public function pro(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'plan' => UserPlan::Pro,
+            'stripe_customer_id' => 'cus_'.Str::random(14),
+            'stripe_subscription_id' => 'sub_'.Str::random(14),
+            'subscription_status' => SubscriptionStatus::Active,
+            'subscription_ends_at' => now()->addMonth(),
+        ]);
+    }
+
+    /**
+     * Indicate that the user is trialing.
+     */
+    public function trialing(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'plan' => UserPlan::Pro,
+            'subscription_status' => SubscriptionStatus::Trialing,
+            'trial_ends_at' => now()->addDays(14),
+        ]);
     }
 
     /**
