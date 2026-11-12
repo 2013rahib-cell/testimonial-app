@@ -38,6 +38,11 @@
                     <p class="mt-1 text-sm text-red-700 dark:text-red-300">
                         You have reached the maximum limit of <strong>{{ $this->maxSpacesAllowed }} spaces</strong> on your current Free plan. Upgrade to Testimonial Pro to create up to 25 spaces and collect thousands of testimonials.
                     </p>
+                    <div class="mt-3">
+                        <a href="{{ route('settings.billing') }}" wire:navigate class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500 transition">
+                            Upgrade to Pro ($9.99/mo)
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

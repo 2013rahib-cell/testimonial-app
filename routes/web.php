@@ -21,6 +21,9 @@ Route::get('s/{slug}', SubmitTestimonial::class)->name('spaces.submit');
 // Public Wall of Love embed endpoint
 Route::get('embed/wall-of-love/{slug}', WallOfLoveEmbed::class)->name('wall-of-love.embed');
 
+// Stripe Webhook endpoint
+Route::post('stripe/webhook', [\App\Http\Controllers\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::get('embeds', EmbedGenerator::class)->name('embed.generator');

@@ -61,6 +61,9 @@
                         You have utilized all <strong>{{ $maxSpaces }} free spaces</strong>. Upgrade to <strong>Pro ($9.99/mo)</strong> to manage up to 25 spaces!
                     </p>
                 </div>
+                <a href="{{ route('settings.billing') }}" wire:navigate class="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 transition">
+                    Upgrade to Pro
+                </a>
             </div>
         </div>
     @endif
