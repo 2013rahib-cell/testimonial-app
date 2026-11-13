@@ -19,8 +19,22 @@ class StripeService
     public function __construct()
     {
         $secretKey = (string) config('services.stripe.secret', '');
-        Stripe::setApiKey($secretKey);
-        $this->client = new StripeClient($secretKey);
+
+        // StripeClient throws on an empty-string key; use null so the app can still
+        // boot (and show a friendly "not configured" message) without Stripe credentials.
+        if ($secretKey !== '') {
+            Stripe::setApiKey($secretKey);
+        }
+
+        $this->client = new StripeClient(['api_key' => $secretKey !== '' ? $secretKey : null]);
+    }
+
+    /**
+     * Whether Stripe API credentials are present in the environment.
+     */
+    public static function isConfigured(): bool
+    {
+        return (string) config('services.stripe.secret', '') !== '';
     }
 
     /**

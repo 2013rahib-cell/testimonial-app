@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Dashboard;
+use App\Http\Controllers\StripeWebhookController;
 use App\Livewire\Embed\Generator as EmbedGenerator;
 use App\Livewire\Public\SubmitTestimonial;
 use App\Livewire\Public\WallOfLoveEmbed;
+use App\Livewire\Public\WallPage;
 use App\Livewire\Spaces\Create as SpaceCreate;
 use App\Livewire\Spaces\Edit as SpaceEdit;
-use App\Livewire\Spaces\Index as SpaceIndex;
 use App\Livewire\Spaces\Inbox as SpaceInbox;
+use App\Livewire\Spaces\Index as SpaceIndex;
 use App\Livewire\Spaces\Success as SpaceSuccess;
 use Illuminate\Support\Facades\Route;
 
@@ -17,12 +18,16 @@ Route::view('/', 'welcome')->name('home');
 
 // Public collection page for customers
 Route::get('s/{slug}', SubmitTestimonial::class)->name('spaces.submit');
+Route::get('space/{slug}', SubmitTestimonial::class)->name('spaces.submit.space');
+
+// Public, shareable Wall of Love page
+Route::get('wall/{slug}', WallPage::class)->name('wall.show');
 
 // Public Wall of Love embed endpoint
 Route::get('embed/wall-of-love/{slug}', WallOfLoveEmbed::class)->name('wall-of-love.embed');
 
 // Stripe Webhook endpoint
-Route::post('stripe/webhook', [\App\Http\Controllers\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\MockPaymentGateway;
 use App\Services\StripeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,14 @@ class BillingCheckoutController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+
+        if (MockPaymentGateway::isEnabled()) {
+            return redirect()->route('billing.demo-checkout');
+        }
+
+        if (! StripeService::isConfigured()) {
+            return redirect()->route('settings.billing')->with('error', 'Payments are not configured yet.');
+        }
 
         $session = $stripeService->createProCheckoutSession(
             user: $user,
@@ -40,6 +49,10 @@ class BillingCheckoutController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+
+        if (! StripeService::isConfigured()) {
+            return redirect()->route('settings.billing')->with('error', 'Payments are not configured yet.');
+        }
 
         $session = $stripeService->createBillingPortalSession(
             user: $user,

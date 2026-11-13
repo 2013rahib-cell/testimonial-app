@@ -52,6 +52,7 @@ class StripeBillingTest extends TestCase
             'stripe_customer_id' => 'cus_test123',
             'stripe_subscription_id' => 'sub_test123',
         ]);
+        config(['services.stripe.secret' => 'sk_test_fake']); // real Stripe mode (not demo checkout)
 
         $this->actingAs($user)
             ->get(route('settings.billing'))
@@ -80,6 +81,7 @@ class StripeBillingTest extends TestCase
             ->andReturn($fakeCheckoutSession);
 
         $this->app->instance(StripeService::class, $stripeMock);
+        config(['services.stripe.secret' => 'sk_test_fake']);
 
         $this->actingAs($user);
 
@@ -108,6 +110,7 @@ class StripeBillingTest extends TestCase
             ->andReturn($fakePortalSession);
 
         $this->app->instance(StripeService::class, $stripeMock);
+        config(['services.stripe.secret' => 'sk_test_fake']);
 
         $this->actingAs($user);
 
