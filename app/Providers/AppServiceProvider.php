@@ -36,9 +36,16 @@ class AppServiceProvider extends ServiceProvider
 
         // Behind a proxy (trustProxies '*'), never let client-supplied Host /
         // X-Forwarded-Host headers decide generated URLs (e.g. password-reset links).
-        if (app()->isProduction() && filled(config('app.url'))) {
-            URL::forceRootUrl((string) config('app.url'));
-            URL::forceScheme('https');
+        $appUrl = (string) config('app.url');
+
+        if (app()->isProduction() && $appUrl !== '') {
+            URL::forceRootUrl($appUrl);
+
+            // Force https only when the public URL is https (e.g. Render), so a plain
+            // http container run (docker run … APP_URL=http://localhost) still works.
+            if (str_starts_with($appUrl, 'https://')) {
+                URL::forceScheme('https');
+            }
         }
 
         DB::prohibitDestructiveCommands(

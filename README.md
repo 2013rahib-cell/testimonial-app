@@ -178,18 +178,93 @@ GitHub Pages can only host static files, so the app ships as a **Docker** image 
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/2013rahib-cell/testimonial-app)
 
-1. In Render choose **New → Blueprint** and select this repository (or click the button above).
-2. Fill in the Stripe variables when prompted – or leave them empty to use the demo checkout.
-3. Deploy. The app is served at `https://<service>.onrender.com`; `APP_KEY` is generated for you and
-   `APP_URL` defaults to the Render URL. Every push to the default branch redeploys automatically.
+### What's included
 
-On start-up the container (`docker/entrypoint.sh`) binds Apache to `$PORT`, creates the SQLite database,
-runs migrations, links storage, seeds the demo account (`SEED_DEMO_DATA=true`) and caches configuration.
-Health check: `/up`.
+| File | Purpose |
+|---|---|
+| `Dockerfile` | Multi-stage build: Composer dependencies → Vite asset build → PHP 8.4 + Apache runtime |
+| `docker/entrypoint.sh` | Start-up script: binds Apache to `$PORT`, creates the SQLite database, runs migrations, links storage, seeds the demo account, caches config |
+| `docker/php.ini` | Production PHP settings (upload limits, OPcache) |
+| `render.yaml` | Render Blueprint – service definition and environment variables |
+| `.dockerignore` | Keeps `.env`, `vendor/`, `node_modules/` and local data out of the image |
 
-> **Note:** Render's free plan has an ephemeral disk – the SQLite database and uploaded photos reset on every
-> deploy/restart. For persistent data attach a Render Disk and set `DB_DATABASE=/var/data/database.sqlite`,
-> or point `DB_CONNECTION` to a managed PostgreSQL database.
+### Prerequisites
+- This repository pushed to GitHub (public, or private with Render granted access)
+- A free [Render](https://render.com) account connected to your GitHub account
+
+### Option A – One-click Blueprint (recommended)
+
+1. **Start the deploy** – click the **Deploy to Render** button above, or in the Render dashboard choose
+   **New → Blueprint** and select this repository. Render reads `render.yaml` automatically.
+2. **Review the service** – Render shows the web service `testimonial-wall-of-love` (Docker, free plan). Keep the defaults.
+3. **Fill in secrets** – Render prompts for `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET` and `STRIPE_PRICE_ID`.
+   Leave them **empty** to run with the built-in demo checkout, or paste your Stripe test/live keys.
+4. **Apply** – click **Apply / Deploy Blueprint**. The first Docker build takes roughly 5–10 minutes;
+   follow progress in the service's **Logs** tab.
+5. **Open the app** at `https://<service-name>.onrender.com`. `APP_KEY` is generated automatically and
+   `APP_URL` defaults to the Render URL.
+
+### Option B – Manual web service
+
+1. Render dashboard → **New → Web Service** → connect this repository.
+2. **Runtime:** Docker · **Dockerfile path:** `./Dockerfile` · **Health check path:** `/up`.
+3. Add environment variables (minimum):
+
+   | Key | Value |
+   |---|---|
+   | `APP_KEY` | output of `php artisan key:generate --show` (starts with `base64:`) |
+   | `APP_ENV` | `production` |
+   | `APP_DEBUG` | `false` |
+   | `DB_CONNECTION` | `sqlite` |
+   | `SESSION_SECURE_COOKIE` | `true` |
+   | `LOG_CHANNEL` | `stderr` |
+   | `SEED_DEMO_DATA` | `true` (creates `demo@example.com` / `password`) |
+
+4. Click **Create Web Service**.
+
+### After deploying – verify
+
+- [ ] `https://<your-app>/up` returns **200**
+- [ ] The landing page loads with styles, and you can log in as `demo@example.com` / `password`
+- [ ] `https://<your-app>/s/test-product` accepts a testimonial; approve it in the inbox and see it on `/wall/test-product`
+- [ ] Embed snippets in **Embed Widget** point to your Render URL
+
+### Going further
+
+- **Real payments** – add your Stripe keys in **Environment**, then create a Stripe webhook endpoint
+  `https://<your-app>/stripe/webhook` (events: `checkout.session.completed`, `customer.subscription.*`, `invoice.*`)
+  and save its signing secret as `STRIPE_WEBHOOK_SECRET`. The demo checkout switches off automatically.
+- **Real emails** – set `MAIL_MAILER=smtp` and the `MAIL_*` variables so new users receive verification emails
+  (with the default `log` mailer only the seeded demo account can reach the dashboard).
+- **Custom domain** – add it under **Settings → Custom Domains** and set `APP_URL=https://your-domain.com`.
+- **Persistent data** – Render's free plan has an **ephemeral disk**: the SQLite database and uploaded photos reset on
+  every deploy or restart. Attach a Render Disk mounted at `/var/data` and set `DB_DATABASE=/var/data/database.sqlite`,
+  or point `DB_CONNECTION` to a managed PostgreSQL database.
+- **Auto-deploy** – every push to `main` redeploys; GitHub Actions runs the test suite on every push and pull request.
+
+### Deploying elsewhere with Docker
+
+The image runs on any Docker host (Railway, Fly.io, a VPS, …):
+
+```bash
+docker build -t wall-of-love .
+docker run -p 8080:10000 \
+  -e APP_KEY="$(php artisan key:generate --show)" \
+  -e APP_URL=http://localhost:8080 \
+  -e APP_ENV=production -e APP_DEBUG=false \
+  -e SEED_DEMO_DATA=true \
+  wall-of-love
+# → http://localhost:8080
+```
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| Container exits with `APP_KEY is not set` | Add `APP_KEY` (Blueprint generates it; manual services must set it) |
+| Page loads without styles / mixed-content warnings | Make sure `APP_URL` is the public `https://` URL |
+| Data disappears after a redeploy | Expected on the free plan – see *Persistent data* above |
+| `/stripe/webhook` returns 500 | `STRIPE_WEBHOOK_SECRET` is missing – unsigned webhooks are rejected in production |
 
 ---
 
