@@ -8,7 +8,7 @@ Share one link to gather testimonials, approve the best ones from a single inbox
 on any website with a beautiful, auto-resizing "Wall of Love" widget.
 
 [![Tests](https://github.com/2013rahib-cell/testimonial-app/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/2013rahib-cell/testimonial-app/actions/workflows/tests.yml)
-![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.4%2B-777BB4?logo=php&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?logo=laravel&logoColor=white)
 ![Livewire](https://img.shields.io/badge/Livewire-4-FB70A9?logo=livewire&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
@@ -87,7 +87,7 @@ It solves a common problem for businesses: social proof is valuable, but collect
 
 | Layer | Technology |
 |---|---|
-| Backend | **Laravel 13** (PHP 8.3+) |
+| Backend | **Laravel 13** (PHP 8.4+) |
 | UI | **Livewire 4** class components, **Flux UI**, **Tailwind CSS 4**, Alpine.js |
 | Auth | **Laravel Fortify** – sessions, email verification, 2FA, passkeys |
 | Database | **SQLite** by default (any Laravel-supported database works) |
@@ -101,7 +101,7 @@ It solves a common problem for businesses: social proof is valuable, but collect
 ## Quick Start
 
 ### Prerequisites
-- **PHP 8.3+** with `pdo_sqlite` (and ideally `intl`)
+- **PHP 8.4+** with `pdo_sqlite` (and ideally `intl`)
 - **Composer 2**, **Node.js 20+** and npm, **Git**
 - *Windows only:* the Microsoft Visual C++ Redistributable (needed by the Vite build tool)
   ```powershell

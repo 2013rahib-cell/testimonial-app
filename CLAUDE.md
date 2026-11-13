@@ -9,7 +9,7 @@ and **embed** the approved ones as a "Wall of Love" widget on any website. Freem
 Free (3 spaces, 100 testimonials/space) and Pro ($9.99/mo via Stripe: 25 spaces, 1,000/space).
 
 ## WHAT – actual stack (verify in composer.json / package.json)
-- **Laravel 13**, PHP 8.3+ (dev machine runs 8.4), **SQLite** (`database/database.sqlite`)
+- **Laravel 13**, PHP 8.4+ (the locked Symfony 8 packages require it), **SQLite** (`database/database.sqlite`)
 - **Livewire 4** class components + Blade views, **Flux UI** components, **Tailwind CSS 4**
 - **Auth: Laravel Fortify** (Livewire starter kit: login, register, reset, email verification, 2FA, passkeys).
   *Not* Breeze, despite older docs.
