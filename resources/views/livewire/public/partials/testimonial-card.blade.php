@@ -11,7 +11,7 @@
         <div class="flex items-center gap-3 min-w-0">
             @if ($testimonial->submitter_avatar_path)
                 <img
-                    src="{{ Storage::url($testimonial->submitter_avatar_path) }}"
+                    src="{{ Storage::disk('public')->url($testimonial->submitter_avatar_path) }}"
                     alt="{{ $testimonial->submitter_name }}"
                     class="size-10 rounded-full object-cover shrink-0 ring-1 {{ $isDark ? 'ring-zinc-700' : 'ring-zinc-200' }}"
                 >
@@ -24,7 +24,11 @@
 
             <div class="min-w-0">
                 <p class="text-sm font-semibold truncate {{ $isDark ? 'text-zinc-100' : 'text-zinc-900' }}">
-                    {{ $testimonial->submitter_name }}
+                    @if ($testimonial->submitter_social_url)
+                        <a href="{{ $testimonial->submitter_social_url }}" target="_blank" rel="nofollow noopener noreferrer" class="hover:underline">{{ $testimonial->submitter_name }}</a>
+                    @else
+                        {{ $testimonial->submitter_name }}
+                    @endif
                 </p>
                 @if ($testimonial->submitter_role || $testimonial->submitter_company)
                     <p class="text-xs truncate {{ $isDark ? 'text-zinc-400' : 'text-zinc-500' }}">
@@ -70,14 +74,14 @@
             <svg class="size-4 text-indigo-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
             </svg>
-            <span class="text-xs truncate text-indigo-600 dark:text-indigo-400 font-medium">Video Testimonial</span>
+            <span class="text-xs truncate font-medium {{ $isDark ? 'text-indigo-400' : 'text-indigo-600' }}">Video Testimonial</span>
         </div>
     @endif
 
     {{-- Footer Meta --}}
     <div class="mt-4 flex items-center justify-between border-t pt-3 text-[11px] {{ $isDark ? 'border-zinc-800 text-zinc-500' : 'border-zinc-100 text-zinc-400' }}">
         <span>{{ $testimonial->created_at?->diffForHumans() }}</span>
-        <span class="inline-flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
+        <span class="inline-flex items-center gap-1 font-medium {{ $isDark ? 'text-emerald-400' : 'text-emerald-600' }}">
             <svg class="size-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
             Verified
         </span>

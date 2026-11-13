@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use App\Enums\SubscriptionStatus;
-use App\Enums\TestimonialStatus;
-use App\Enums\TestimonialType;
 use App\Enums\UserPlan;
 use App\Models\Space;
 use App\Models\Testimonial;

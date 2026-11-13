@@ -6,11 +6,16 @@ namespace App\Livewire\Spaces;
 
 use App\Models\Space;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * Livewire #[Computed] properties:
+ *
+ * @property-read string $publicUrl
+ */
 #[Layout('layouts.app')]
 class Success extends Component
 {
@@ -18,10 +23,8 @@ class Success extends Component
 
     public function mount(Space $space): void
     {
-        // Enforce tenant isolation
-        if ($space->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized space access.');
-        }
+        // Tenant isolation (SpacePolicy@view)
+        Gate::authorize('view', $space);
 
         $this->space = $space;
     }

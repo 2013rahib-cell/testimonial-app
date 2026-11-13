@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SpaceTheme;
+use Carbon\CarbonImmutable;
 use Database\Factories\SpaceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,7 +13,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -35,8 +35,8 @@ use Illuminate\Support\Carbon;
  * @property bool $require_avatar
  * @property bool $enable_ratings
  * @property bool $is_active
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
  * @property-read User $user
  */
 #[Fillable([
@@ -134,7 +134,7 @@ class Space extends Model
     /**
      * Scope a query to only include active spaces.
      *
-     * @param Builder<$this> $query
+     * @param  Builder<$this>  $query
      * @return Builder<$this>
      */
     public function scopeActive(Builder $query): Builder

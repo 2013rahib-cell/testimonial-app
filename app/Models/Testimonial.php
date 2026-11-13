@@ -6,13 +6,13 @@ namespace App\Models;
 
 use App\Enums\TestimonialStatus;
 use App\Enums\TestimonialType;
+use Carbon\CarbonImmutable;
 use Database\Factories\TestimonialFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $submitter_avatar_path
  * @property string|null $submitter_company
  * @property string|null $submitter_role
+ * @property string|null $submitter_social_url
  * @property string $content
  * @property int|null $rating
  * @property TestimonialType $type
@@ -29,8 +30,8 @@ use Illuminate\Support\Carbon;
  * @property TestimonialStatus $status
  * @property bool $is_featured
  * @property bool $is_hidden
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
  * @property-read Space $space
  */
 #[Fillable([
@@ -39,6 +40,7 @@ use Illuminate\Support\Carbon;
     'submitter_avatar_path',
     'submitter_company',
     'submitter_role',
+    'submitter_social_url',
     'content',
     'rating',
     'type',
@@ -63,6 +65,7 @@ class Testimonial extends Model
         'submitter_avatar_path',
         'submitter_company',
         'submitter_role',
+        'submitter_social_url',
         'content',
         'rating',
         'type',
@@ -102,7 +105,7 @@ class Testimonial extends Model
     /**
      * Scope a query to only include approved testimonials.
      *
-     * @param Builder<$this> $query
+     * @param  Builder<$this>  $query
      * @return Builder<$this>
      */
     public function scopeApproved(Builder $query): Builder
@@ -113,7 +116,7 @@ class Testimonial extends Model
     /**
      * Scope a query to only include featured testimonials.
      *
-     * @param Builder<$this> $query
+     * @param  Builder<$this>  $query
      * @return Builder<$this>
      */
     public function scopeFeatured(Builder $query): Builder
@@ -124,7 +127,7 @@ class Testimonial extends Model
     /**
      * Scope a query to exclude hidden testimonials.
      *
-     * @param Builder<$this> $query
+     * @param  Builder<$this>  $query
      * @return Builder<$this>
      */
     public function scopeVisible(Builder $query): Builder

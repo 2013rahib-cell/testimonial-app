@@ -214,6 +214,7 @@ class SpacesTest extends TestCase
             ->set('rating', 5)
             ->set('content', 'This service completely exceeded our team expectations!')
             ->set('company', 'Acme Inc.')
+            ->set('consent', true)
             ->call('submit')
             ->assertHasNoErrors()
             ->assertSet('submitted', true);
@@ -241,7 +242,7 @@ class SpacesTest extends TestCase
             ->set('content', '')
             ->set('company', '')
             ->call('submit')
-            ->assertHasErrors(['name', 'email', 'content', 'company']);
+            ->assertHasErrors(['name', 'email', 'content', 'company', 'consent']);
     }
 
     public function test_user_cannot_mass_assign_plan_or_billing_fields(): void
@@ -264,7 +265,7 @@ class SpacesTest extends TestCase
         $user = User::factory()->create();
         $space = Space::factory()->create(['user_id' => $user->id]);
 
-        $testimonial = new Testimonial();
+        $testimonial = new Testimonial;
         $testimonial->fill([
             'space_id' => $space->id,
             'submitter_name' => 'John Doe',

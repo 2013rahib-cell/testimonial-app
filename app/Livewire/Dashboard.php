@@ -12,6 +12,14 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+/**
+ * Livewire #[Computed] properties:
+ *
+ * @property-read User $user
+ * @property-read array<string, mixed> $metrics
+ * @property-read array<string, mixed> $timeSeries
+ * @property-read int $spacesCount
+ */
 class Dashboard extends Component
 {
     /**
@@ -38,9 +46,16 @@ class Dashboard extends Component
     /**
      * Dismiss the upgrade banner.
      */
+    public function mount(): void
+    {
+        // Keep the upgrade banner hidden for the rest of the login session once dismissed.
+        $this->bannerDismissed = (bool) session('upgrade_banner_dismissed', false);
+    }
+
     public function dismissBanner(): void
     {
         $this->bannerDismissed = true;
+        session()->put('upgrade_banner_dismissed', true);
     }
 
     /**

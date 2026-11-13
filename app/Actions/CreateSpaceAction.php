@@ -35,6 +35,7 @@ class CreateSpaceAction
      *     enable_ratings?: bool,
      *     is_active?: bool,
      * } $data
+     *
      * @throws PlanLimitExceededException
      */
     public function execute(User $user, array $data): Space

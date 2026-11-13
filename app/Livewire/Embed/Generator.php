@@ -7,6 +7,7 @@ namespace App\Livewire\Embed;
 use App\Models\Space;
 use App\Models\Testimonial;
 use App\Models\User;
+use App\Support\CssColor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,18 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+/**
+ * Livewire #[Computed] properties:
+ *
+ * @property-read User $user
+ * @property-read Collection<int, Space> $spaces
+ * @property-read Space|null $selectedSpace
+ * @property-read Collection<int, Testimonial> $testimonials
+ * @property-read int $approvedCount
+ * @property-read string $embedUrl
+ * @property-read string $iframeSnippet
+ * @property-read string $scriptSnippet
+ */
 #[Layout('layouts.app')]
 class Generator extends Component
 {
@@ -52,6 +65,8 @@ class Generator extends Component
         if (! in_array($this->theme, ['light', 'dark'], true)) {
             $this->theme = 'light';
         }
+
+        $this->backgroundColor = CssColor::sanitize($this->backgroundColor, $this->theme === 'dark' ? '#09090b' : '#ffffff');
     }
 
     #[Computed]
@@ -96,7 +111,7 @@ class Generator extends Component
     public function testimonials(): Collection
     {
         if (! $this->selectedSpace) {
-            return new Collection();
+            return new Collection;
         }
 
         return $this->selectedSpace->testimonials()
@@ -164,7 +179,7 @@ class Generator extends Component
         $scriptUrl = url('/embed.js');
 
         return sprintf(
-            '<div id="wall-of-love" data-space="%s" data-layout="%s" data-theme="%s" data-bg="%s" data-animations="%s"></div>' . "\n" .
+            '<div id="wall-of-love" data-space="%s" data-layout="%s" data-theme="%s" data-bg="%s" data-animations="%s"></div>'."\n".
             '<script src="%s" defer></script>',
             e($this->selectedSpace->slug),
             e($this->layout),
@@ -203,7 +218,16 @@ class Generator extends Component
 
     public function setBackgroundColor(string $color): void
     {
-        $this->backgroundColor = $color;
+        $this->backgroundColor = CssColor::sanitize($color, $this->backgroundColor);
+    }
+
+    /**
+     * Ignore invalid colours typed into the text field (keeps the previous valid value).
+     */
+    public function updatedBackgroundColor(string $value): void
+    {
+        $this->backgroundColor = CssColor::sanitize($value, $this->theme === 'dark' ? '#09090b' : '#ffffff');
+        unset($this->embedUrl, $this->iframeSnippet, $this->scriptSnippet);
     }
 
     public function toggleAnimations(): void

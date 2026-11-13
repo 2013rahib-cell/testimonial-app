@@ -7,9 +7,9 @@ namespace App\Http\Controllers;
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserPlan;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Stripe\Event;
 use Stripe\Exception\SignatureVerificationException;
@@ -38,7 +38,14 @@ class StripeWebhookController extends Controller
 
                 return response()->json(['error' => 'Invalid payload'], 400);
             }
+        } elseif (! app()->environment(['local', 'testing'])) {
+            // Fail closed: without a signing secret anyone could forge a "payment succeeded"
+            // event and upgrade any account to Pro for free.
+            Log::error('Stripe webhook rejected: STRIPE_WEBHOOK_SECRET is not configured.');
+
+            return response()->json(['error' => 'Webhook signing secret not configured'], 500);
         } else {
+            // Local development / automated tests only: accept unsigned payloads.
             /** @var array<string, mixed>|null $data */
             $data = json_decode($payload, true);
             if (! is_array($data)) {
@@ -151,11 +158,11 @@ class StripeWebhookController extends Controller
         }
 
         if (! empty($subscription->current_period_end)) {
-            $user->subscription_ends_at = Carbon::createFromTimestamp((int) $subscription->current_period_end);
+            $user->subscription_ends_at = CarbonImmutable::createFromTimestamp((int) $subscription->current_period_end);
         }
 
         if (! empty($subscription->trial_end)) {
-            $user->trial_ends_at = Carbon::createFromTimestamp((int) $subscription->trial_end);
+            $user->trial_ends_at = CarbonImmutable::createFromTimestamp((int) $subscription->trial_end);
         }
 
         $user->save();
@@ -174,7 +181,7 @@ class StripeWebhookController extends Controller
 
         $user->plan = UserPlan::Free;
         $user->subscription_status = SubscriptionStatus::Canceled;
-        $user->subscription_ends_at = now();
+        $user->subscription_ends_at = CarbonImmutable::now();
         $user->save();
     }
 
