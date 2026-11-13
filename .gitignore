@@ -15,6 +15,12 @@
 Homestead.json
 Homestead.yaml
 npm-debug.log
+# Lockfile generated on Windows omits Linux native optional deps (npm/cli#4828); CI/Docker run `npm install`.
+/package-lock.json
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
 yarn-error.log
 /auth.json
 /.fleet
@@ -24,7 +30,9 @@ yarn-error.log
 /.zed
 /.agents
 /.amp
-/.claude
+/.claude/*
+# Project subagents are part of the deliverable (see CLAUDE.md); local settings stay private.
+!/.claude/agents/
 /.codex
 /.cursor
 /.factory
@@ -34,7 +42,6 @@ yarn-error.log
 /.pi
 /.mcp.json
 /AGENTS.md
-/CLAUDE.md
 /boost.json
 /opencode.json
 /opencode.jsonc

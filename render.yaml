@@ -1,0 +1,54 @@
+# Render Blueprint – https://render.com/docs/blueprint-spec
+# Deploy: Render dashboard → New → Blueprint → select this GitHub repo.
+# Every push to the default branch redeploys automatically.
+services:
+  - type: web
+    name: testimonial-wall-of-love
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: Wall of Love
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      # APP_URL defaults to Render's RENDER_EXTERNAL_URL (see docker/entrypoint.sh);
+      # set it explicitly if you add a custom domain.
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: MAIL_MAILER
+        value: log
+      # Seeds the verified demo account (demo@example.com / password) on every boot (idempotent).
+      - key: SEED_DEMO_DATA
+        value: "true"
+      # Demo checkout (no real payments) while STRIPE_SECRET is empty. It turns itself off
+      # once Stripe keys are added; set to "false" to disable it explicitly.
+      - key: BILLING_MOCK
+        value: "true"
+      # Stripe – fill these in the Render dashboard (never commit them).
+      - key: STRIPE_KEY
+        sync: false
+      - key: STRIPE_SECRET
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_ID
+        sync: false
