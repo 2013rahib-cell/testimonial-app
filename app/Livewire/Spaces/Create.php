@@ -15,6 +15,14 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * Livewire #[Computed] properties:
+ *
+ * @property-read User $user
+ * @property-read int $currentSpacesCount
+ * @property-read int $maxSpacesAllowed
+ * @property-read bool $isAtLimit
+ */
 #[Layout('layouts.app')]
 class Create extends Component
 {
@@ -80,14 +88,28 @@ class Create extends Component
     /**
      * Automatically suggest title and slug when name changes.
      */
+    /**
+     * Name before the current update – used to tell an auto-filled slug from a typed one.
+     */
+    private string $previousName = '';
+
+    public function updatingName(string $value): void
+    {
+        $this->previousName = $this->name;
+    }
+
     public function updatedName(string $value): void
     {
-        if (! $this->manuallyEditedSlug) {
+        // Only auto-fill while the slug is empty or still the auto-generated one.
+        // (A typed slug can arrive in the same request as a debounced name update.)
+        $slugIsAuto = $this->slug === '' || $this->slug === Str::slug($this->previousName);
+
+        if (! $this->manuallyEditedSlug && $slugIsAuto) {
             $this->slug = Str::slug($value);
         }
 
-        if (blank($this->title) || $this->title === 'Would you share a quick review for ' . Str::before($this->title, '?')) {
-            $this->title = 'Would you share a quick review for ' . trim($value) . '?';
+        if (blank($this->title) || $this->title === 'Would you share a quick review for '.Str::before($this->title, '?')) {
+            $this->title = 'Would you share a quick review for '.trim($value).'?';
         }
     }
 
@@ -172,7 +194,9 @@ class Create extends Component
         if ($this->isAtLimit) {
             $this->addError(
                 'limit',
-                "You have reached your limit of {$this->maxSpacesAllowed} spaces on the Free plan. Please upgrade to Pro to create more spaces."
+                $this->user->isProPlan()
+                    ? "You have reached the Pro plan limit of {$this->maxSpacesAllowed} spaces. Delete an unused space to create a new one."
+                    : "You have reached your limit of {$this->maxSpacesAllowed} spaces on the Free plan. Please upgrade to Pro to create more spaces."
             );
 
             return null;

@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind Render's (or any) TLS-terminating proxy: honour X-Forwarded-* so
+        // generated URLs, Livewire uploads and secure cookies use https.
+        $middleware->trustProxies(at: '*');
+
         $middleware->validateCsrfTokens(except: [
             'stripe/*',
         ]);

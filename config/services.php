@@ -42,4 +42,10 @@ return [
         'price_id' => env('STRIPE_PRICE_ID'),
     ],
 
+    // Demo checkout used while Stripe keys are not configured (see MockPaymentGateway).
+    // Set BILLING_MOCK=false to disable it entirely.
+    'billing' => [
+        'mock' => (bool) env('BILLING_MOCK', true),
+    ],
+
 ];

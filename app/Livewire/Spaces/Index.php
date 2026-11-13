@@ -13,6 +13,15 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * Livewire #[Computed] properties:
+ *
+ * @property-read User $user
+ * @property-read Collection<int, Space> $spaces
+ * @property-read int $spacesCount
+ * @property-read int $maxSpaces
+ * @property-read bool $isAtLimit
+ */
 #[Layout('layouts.app')]
 class Index extends Component
 {

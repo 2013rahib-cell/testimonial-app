@@ -6,6 +6,7 @@ namespace App\Livewire\Public;
 
 use App\Models\Space;
 use App\Models\Testimonial;
+use App\Support\CssColor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
@@ -13,6 +14,11 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+/**
+ * Livewire #[Computed] properties:
+ *
+ * @property-read Collection<int, Testimonial> $testimonials
+ */
 #[Layout('layouts.public')]
 class WallOfLoveEmbed extends Component
 {
@@ -45,6 +51,9 @@ class WallOfLoveEmbed extends Component
         if (! in_array($this->theme, ['light', 'dark'], true)) {
             $this->theme = 'light';
         }
+
+        // Prevent CSS injection via ?bg= (value is rendered inside a style attribute).
+        $this->bg = CssColor::sanitize($this->bg, $this->theme === 'dark' ? '#09090b' : '#ffffff');
     }
 
     /**
@@ -67,6 +76,8 @@ class WallOfLoveEmbed extends Component
     {
         return view('livewire.public.wall-of-love-embed', [
             'space' => $this->space,
+            // Re-sanitize on every render: public properties can be updated client-side.
+            'bg' => CssColor::sanitize($this->bg, $this->theme === 'dark' ? '#09090b' : '#ffffff'),
             'testimonials' => $this->testimonials,
             'isDark' => $this->theme === 'dark',
             'isCarousel' => $this->layout === 'carousel',

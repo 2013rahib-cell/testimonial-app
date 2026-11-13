@@ -26,10 +26,21 @@
                     <p class="text-sm opacity-80 max-w-md mx-auto">
                         Your testimonial for <strong>{{ $space->name }}</strong> has been submitted successfully and sent for review.
                     </p>
+
+                    {{-- Funny confirmation meme / GIF --}}
+                    <div class="my-6 flex justify-center">
+                        <img
+                            src="{{ asset('images/thank-you.gif') }}"
+                            alt="Celebration GIF"
+                            data-testid="confirmation-gif"
+                            class="rounded-xl shadow-lg max-w-xs sm:max-w-sm w-full object-cover border border-current/10"
+                        />
+                    </div>
+
                     <div class="pt-4">
                         <button
                             type="button"
-                            wire:click="$set('submitted', false)"
+                            wire:click="submitAnother"
                             class="text-xs underline opacity-70 hover:opacity-100"
                         >
                             Submit another response
@@ -189,9 +200,10 @@
                             </label>
                             <input
                                 type="text"
+                                inputmode="url"
                                 id="socialLinks"
                                 wire:model="socialLinks"
-                                placeholder="https://twitter.com/yourhandle or linkedin.com/in/username"
+                                placeholder="linkedin.com/in/username or https://x.com/yourhandle"
                                 class="mt-1 block w-full rounded-xl border border-current/20 bg-current/5 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 @required($space->require_social_links)
                             />
@@ -214,15 +226,35 @@
                                 class="mt-1 block w-full text-xs opacity-80 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-current/10 file:text-current hover:file:bg-current/20 cursor-pointer"
                                 @required($space->require_avatar)
                             />
+                            <div wire:loading wire:target="avatar" class="mt-1 text-xs opacity-70">Uploading photo…</div>
+                            <p class="mt-1 text-[11px] opacity-60">JPG, PNG, GIF or WebP · max 2&nbsp;MB</p>
                             @error('avatar') <span class="mt-1 block text-xs text-red-500">{{ $message }}</span> @enderror
                         </div>
                     @endif
+
+                    {{-- Social Sharing Consent Checkbox --}}
+                    <div class="pt-2">
+                        <label for="consent" class="flex items-start gap-3 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                id="consent"
+                                wire:model="consent"
+                                class="mt-0.5 h-4 w-4 rounded border-current/30 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                            />
+                            <span class="text-xs opacity-80 leading-relaxed">
+                                I give permission to use this testimonial across social media channels and marketing materials. <span class="text-red-500">*</span>
+                            </span>
+                        </label>
+                        @error('consent') <span class="mt-1 block text-xs text-red-500">{{ $message }}</span> @enderror
+                    </div>
 
                     {{-- Submit Button --}}
                     <div class="pt-4">
                         <button
                             type="submit"
-                            class="w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-6 text-sm font-bold shadow-md transition-all focus:outline-none focus:ring-2 {{ $theme->buttonClasses() }}"
+                            wire:loading.attr="disabled"
+                            wire:target="submit,avatar"
+                            class="disabled:opacity-60 disabled:cursor-wait w-full inline-flex items-center justify-center gap-2 rounded-xl py-3 px-6 text-sm font-bold shadow-md transition-all focus:outline-none focus:ring-2 {{ $theme->buttonClasses() }}"
                         >
                             <span wire:loading.remove wire:target="submit">
                                 {{ $space->custom_cta ?: 'Send Testimonial' }}

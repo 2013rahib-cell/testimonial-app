@@ -106,7 +106,7 @@
                         </div>
                     @endif
 
-                    <div class="p-5 pt-{{ $testimonial->is_featured ? '7' : '5' }}">
+                    <div class="p-5 {{ $testimonial->is_featured ? 'pt-7' : 'pt-5' }}">
                         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
 
                             {{-- Customer Info --}}
@@ -115,7 +115,7 @@
                                 <div class="shrink-0">
                                     @if($testimonial->submitter_avatar_path)
                                         <img
-                                            src="{{ Storage::url($testimonial->submitter_avatar_path) }}"
+                                            src="{{ Storage::disk('public')->url($testimonial->submitter_avatar_path) }}"
                                             alt="{{ $testimonial->submitter_name }}"
                                             class="size-10 rounded-full object-cover ring-2 ring-zinc-100 dark:ring-zinc-800"
                                         >
@@ -138,6 +138,11 @@
                                     @endif
                                     @if($testimonial->submitter_email)
                                         <p class="text-xs text-zinc-400 dark:text-zinc-500 truncate">{{ $testimonial->submitter_email }}</p>
+                                    @endif
+                                    @if($testimonial->submitter_social_url)
+                                        <a href="{{ $testimonial->submitter_social_url }}" target="_blank" rel="nofollow noopener noreferrer" class="block text-xs text-indigo-600 hover:underline dark:text-indigo-400 truncate">
+                                            {{ \Illuminate\Support\Str::after($testimonial->submitter_social_url, '://') }}
+                                        </a>
                                     @endif
                                 </div>
                             </div>

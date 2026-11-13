@@ -5,8 +5,19 @@
 
     <x-settings.layout :heading="__('Billing & Subscription')" :subheading="__('Manage your subscription tier, billing details, and plan limits')">
         <div class="my-6 w-full space-y-6">
+            @if ($demoMode)
+                <div class="flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                    <span class="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">Demo mode</span>
+                    <span>Stripe is not connected yet – upgrades use a demo checkout and nothing is charged.</span>
+                </div>
+            @endif
+
             {{-- Notification Messages --}}
-            @if ($checkoutStatus === 'success')
+            @if (session('status'))
+                <div class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-medium text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" role="status">
+                    {{ session('status') }}
+                </div>
+            @elseif ($checkoutStatus === 'success')
                 <div class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
                     <div class="flex items-center gap-2">
                         <svg class="size-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -50,7 +61,11 @@
                         </div>
                     </div>
 
-                    @if ($this->isPro)
+                    @if ($this->isPro && $demoMode)
+                        <flux:button wire:click="cancelDemoSubscription" wire:confirm="Cancel your Pro subscription and return to the Free plan?" variant="danger" icon="x-mark">
+                            {{ __('Cancel subscription') }}
+                        </flux:button>
+                    @elseif ($this->isPro)
                         <flux:button wire:click="manageBilling" variant="primary" icon="credit-card">
                             {{ __('Manage Billing in Stripe') }}
                         </flux:button>
@@ -153,6 +168,15 @@
                                 class="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition cursor-pointer"
                             >
                                 {{ __('Upgrade to Pro ($9.99/mo)') }}
+                            </button>
+                        @elseif ($demoMode)
+                            <button
+                                type="button"
+                                wire:click="cancelDemoSubscription"
+                                wire:confirm="Cancel your Pro subscription and return to the Free plan?"
+                                class="w-full rounded-xl border border-zinc-300 px-4 py-2.5 text-center text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 transition cursor-pointer"
+                            >
+                                {{ __('Cancel Subscription') }}
                             </button>
                         @else
                             <button

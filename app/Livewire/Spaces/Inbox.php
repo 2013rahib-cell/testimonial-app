@@ -11,14 +11,30 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+/**
+ * Livewire #[Computed] properties:
+ *
+ * @property-read User $user
+ * @property-read Collection<int, Testimonial> $testimonials
+ * @property-read int $totalCount
+ * @property-read int $pendingCount
+ * @property-read int $approvedCount
+ * @property-read int $featuredCount
+ * @property-read int $hiddenCount
+ * @property-read int $collectionCap
+ * @property-read bool $isAtCap
+ */
 #[Layout('layouts.app')]
 class Inbox extends Component
 {
+    #[Locked]
     public Space $space;
 
     /** @var string The testimonial content being edited */
@@ -33,13 +49,8 @@ class Inbox extends Component
 
     public function mount(Space $space): void
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        // Authorize: only the space owner may access the inbox
-        if ($space->user_id !== $user->id) {
-            abort(403);
-        }
+        // Tenant isolation: only the space owner may access the inbox (SpacePolicy@view).
+        Gate::authorize('view', $space);
 
         $this->space = $space;
     }
@@ -66,11 +77,11 @@ class Inbox extends Component
             ->orderByDesc('created_at');
 
         return match ($this->filter) {
-            'pending'  => $query->where('status', TestimonialStatus::Pending)->get(),
+            'pending' => $query->where('status', TestimonialStatus::Pending)->get(),
             'approved' => $query->where('status', TestimonialStatus::Approved)->get(),
             'featured' => $query->where('is_featured', true)->get(),
-            'hidden'   => $query->where('is_hidden', true)->get(),
-            default    => $query->get(),
+            'hidden' => $query->where('is_hidden', true)->get(),
+            default => $query->get(),
         };
     }
 
@@ -215,14 +226,14 @@ class Inbox extends Component
     public function render(): View
     {
         return view('livewire.spaces.inbox', [
-            'testimonials'  => $this->testimonials,
-            'totalCount'    => $this->totalCount,
-            'pendingCount'  => $this->pendingCount,
+            'testimonials' => $this->testimonials,
+            'totalCount' => $this->totalCount,
+            'pendingCount' => $this->pendingCount,
             'approvedCount' => $this->approvedCount,
             'featuredCount' => $this->featuredCount,
-            'hiddenCount'   => $this->hiddenCount,
+            'hiddenCount' => $this->hiddenCount,
             'collectionCap' => $this->collectionCap,
-            'isAtCap'       => $this->isAtCap,
+            'isAtCap' => $this->isAtCap,
         ]);
     }
 }

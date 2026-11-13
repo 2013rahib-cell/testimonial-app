@@ -2,6 +2,20 @@
     class="min-h-full w-full p-4 sm:p-6 transition-colors duration-200"
     style="background-color: {{ $bg }};"
     x-data="{
+        {{-- Tell the host page (public/embed.js) how tall we are so the iframe can auto-size. --}}
+        postHeight() {
+            if (window.parent === window || ! this.$refs.content) return;
+            const pad = parseFloat(getComputedStyle(this.$el).paddingTop) * 2;
+            window.parent.postMessage({
+                type: 'wol-resize',
+                space: @js($space->slug),
+                height: Math.ceil(this.$refs.content.offsetHeight + pad),
+            }, '*');
+        },
+        init() {
+            new ResizeObserver(() => this.postHeight()).observe(this.$refs.content);
+            this.postHeight();
+        },
         scrollLeft() {
             if (this.$refs.carousel) {
                 this.$refs.carousel.scrollBy({ left: -340, behavior: 'smooth' });
@@ -14,6 +28,7 @@
         }
     }"
 >
+    <div x-ref="content">
     @if ($testimonials->isEmpty())
         <div class="flex flex-col items-center justify-center py-16 text-center">
             <div class="rounded-full p-4 {{ $isDark ? 'bg-zinc-800 text-zinc-500' : 'bg-zinc-100 text-zinc-400' }}">
@@ -82,4 +97,5 @@
             @endforeach
         </div>
     @endif
+    </div>
 </div>

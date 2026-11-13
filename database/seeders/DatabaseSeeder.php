@@ -19,27 +19,49 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::factory()->create([
-            'name' => 'Demo User',
-            'email' => 'demo@example.com',
-            'plan' => UserPlan::Free,
-        ]);
+        // Idempotent: safe to run `php artisan db:seed` more than once.
+        $user = User::where('email', 'demo@example.com')->first()
+            ?? User::factory()->create([
+                'name' => 'Demo User',
+                'email' => 'demo@example.com',
+                'plan' => UserPlan::Free,
+            ]);
 
-        $space1 = Space::factory()->create([
-            'user_id' => $user->id,
+        $space1 = $this->demoSpace($user, 'saas-product-alpha', [
             'name' => 'SaaS Product Alpha',
-            'slug' => 'saas-product-alpha',
             'website_url' => 'https://alpha.example.com',
             'custom_cta' => 'Share your thoughts with the world!',
         ]);
 
-        $space2 = Space::factory()->create([
-            'user_id' => $user->id,
+        $space2 = $this->demoSpace($user, 'ecommerce-storefront', [
             'name' => 'E-Commerce Storefront',
-            'slug' => 'ecommerce-storefront',
             'website_url' => 'https://shop.example.com',
             'custom_cta' => 'How was your shopping experience?',
         ]);
+
+        $testProductSpace = Space::updateOrCreate(
+            ['slug' => 'test-product'],
+            [
+                'user_id' => $user->id,
+                'name' => 'Test Product',
+                'title' => 'Testimonial Showcase',
+                'subtitle' => 'We love hearing from you',
+                'ask' => 'What did you like best?',
+                'custom_cta' => 'Send Testimonial',
+                'enable_ratings' => true,
+                'collect_company' => true,
+                'require_company' => false,
+                'collect_social_links' => true,
+                'require_social_links' => false,
+                'collect_avatar' => false,
+                'require_avatar' => false,
+                'is_active' => true,
+            ]
+        );
+
+        if ($space1->testimonials()->exists() || $space2->testimonials()->exists()) {
+            return; // sample testimonials already seeded
+        }
 
         $now = Carbon::now();
         $sampleSubmitters = [
@@ -57,6 +79,21 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Diana Prince', 'email' => 'diana@themiscira.org', 'company' => 'Themyscira Embassy', 'role' => 'Ambassador', 'rating' => 5],
         ];
 
+        $quotes = [
+            'We replaced three tools with this. Collecting reviews now takes minutes instead of days.',
+            'Setup took five minutes and our landing page conversion went up 18% after adding the Wall of Love.',
+            'Customers actually enjoy leaving feedback now. The form is simple and looks great on mobile.',
+            'The embed matched our brand perfectly. Light and dark themes saved our designer a full day.',
+            'Curating testimonials from one inbox is a game changer for our marketing team.',
+            'Best purchase this quarter. Our sales team links the wall in every proposal now.',
+            'Approving and pinning the best reviews is incredibly fast. Exactly what we needed.',
+            'Clean, fast and reliable. The carousel widget fits right into our product pages.',
+            'Our agency uses a separate space for every client. Keeping things organised has never been easier.',
+            'The social proof widget paid for itself in the first week.',
+            'Support answered within minutes and the product just works. Highly recommended.',
+            'Finally a testimonial tool that does not feel bloated. Simple, focused and beautiful.',
+        ];
+
         foreach ($sampleSubmitters as $index => $sub) {
             $space = ($index % 2 === 0) ? $space1 : $space2;
             $daysAgo = ($index * 2) % 28;
@@ -69,11 +106,28 @@ class DatabaseSeeder extends Seeder
                 'submitter_company' => $sub['company'],
                 'submitter_role' => $sub['role'],
                 'rating' => $sub['rating'],
+                'content' => $quotes[$index % count($quotes)],
                 'status' => TestimonialStatus::Approved,
                 'is_featured' => $index % 3 === 0,
                 'created_at' => $createdAt,
                 'updated_at' => $createdAt,
             ]);
         }
+    }
+
+    /**
+     * Find a demo space by slug (owned by the demo user) or create it from the factory.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function demoSpace(User $user, string $slug, array $attributes): Space
+    {
+        $space = $user->spaces()->where('slug', $slug)->first();
+
+        if ($space === null) {
+            $space = Space::factory()->create([...$attributes, 'user_id' => $user->id, 'slug' => $slug]);
+        }
+
+        return $space;
     }
 }

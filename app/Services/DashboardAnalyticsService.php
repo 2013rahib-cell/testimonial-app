@@ -7,7 +7,6 @@ namespace App\Services;
 use App\Enums\TestimonialStatus;
 use App\Models\User;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 class DashboardAnalyticsService
 {
@@ -171,7 +170,7 @@ class DashboardAnalyticsService
     /**
      * Compute coordinates and SVG curve for rendering.
      *
-     * @param list<array{label: string, count: int}> $series
+     * @param  list<array{label: string, count: int}>  $series
      * @return array{
      *     labels: list<string>,
      *     data: list<int>,

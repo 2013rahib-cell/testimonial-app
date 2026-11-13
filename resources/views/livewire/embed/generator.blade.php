@@ -13,6 +13,13 @@
         @if ($selectedSpace)
             <div class="flex items-center gap-2">
                 <a
+                    href="{{ route('wall.show', $selectedSpace->slug) }}"
+                    target="_blank"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-rose-400"
+                >
+                    <span>Public Wall Page</span>
+                </a>
+                <a
                     href="{{ $embedUrl }}"
                     target="_blank"
                     class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 shadow-xs hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
@@ -165,7 +172,8 @@
                             >
                             <input
                                 type="text"
-                                wire:model.live="backgroundColor"
+                                wire:model.live.blur="backgroundColor"
+                                aria-label="Background color hex value"
                                 placeholder="#ffffff"
                                 class="w-32 rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-mono text-zinc-900 shadow-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
                             >

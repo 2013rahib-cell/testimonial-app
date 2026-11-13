@@ -8,15 +8,17 @@ use App\Actions\UpdateSpaceAction;
 use App\Enums\SpaceTheme;
 use App\Models\Space;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
 class Edit extends Component
 {
+    #[Locked]
     public Space $space;
 
     public string $name = '';
@@ -53,10 +55,8 @@ class Edit extends Component
 
     public function mount(Space $space): void
     {
-        // Enforce strict tenant isolation
-        if ($space->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized space access.');
-        }
+        // Tenant isolation (SpacePolicy@update)
+        Gate::authorize('update', $space);
 
         $this->space = $space;
         $this->name = $space->name;
@@ -116,12 +116,12 @@ class Edit extends Component
     /**
      * Update space.
      */
-    public function save(UpdateSpaceAction $action): void
+    public function save(UpdateSpaceAction $action): mixed
     {
         // Re-verify tenant isolation
-        if ($this->space->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized space access.');
-        }
+        Gate::authorize('update', $this->space);
+
+        $originalSlug = $this->space->slug;
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'min:2', 'max:255'],
@@ -162,6 +162,16 @@ class Edit extends Component
         ]);
 
         session()->flash('status', 'Space updated successfully!');
+
+        // The slug may have been normalised (e.g. "My Space" -> "my-space"); keep the form in sync.
+        $this->slug = $this->space->slug;
+
+        // The edit URL contains the slug, so move to the new URL when it changes.
+        if ($this->space->slug !== $originalSlug) {
+            return $this->redirectRoute('spaces.edit', ['space' => $this->space->slug], navigate: true);
+        }
+
+        return null;
     }
 
     public function render(): View

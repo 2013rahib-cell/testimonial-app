@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserPlan;
+use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -15,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
@@ -25,20 +25,20 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property int $id
  * @property string $name
  * @property string $email
- * @property Carbon|null $email_verified_at
+ * @property CarbonImmutable|null $email_verified_at
  * @property string $password
  * @property UserPlan $plan
  * @property string|null $stripe_customer_id
  * @property string|null $stripe_subscription_id
  * @property SubscriptionStatus $subscription_status
- * @property Carbon|null $trial_ends_at
- * @property Carbon|null $subscription_ends_at
+ * @property CarbonImmutable|null $trial_ends_at
+ * @property CarbonImmutable|null $subscription_ends_at
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
- * @property Carbon|null $two_factor_confirmed_at
+ * @property CarbonImmutable|null $two_factor_confirmed_at
  * @property string|null $remember_token
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
  */
 #[Fillable([
     'name',
@@ -60,6 +60,17 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         'name',
         'email',
         'password',
+    ];
+
+    /**
+     * Defaults mirroring the DB column defaults, so a freshly created model
+     * (not yet refreshed from the database) always has a plan and status.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'plan' => 'free',
+        'subscription_status' => 'inactive',
     ];
 
     /**
@@ -112,7 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
      */
     public function maxSpaces(): int
     {
-        return $this->plan?->maxSpaces() ?? 3;
+        return $this->plan->maxSpaces();
     }
 
     /**
@@ -120,7 +131,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
      */
     public function maxTestimonialsPerSpace(): int
     {
-        return $this->plan?->maxTestimonialsPerSpace() ?? 100;
+        return $this->plan->maxTestimonialsPerSpace();
     }
 
     /**
